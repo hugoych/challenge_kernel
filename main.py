@@ -1,16 +1,16 @@
 from preprocessing import convert_data
-from svm import my_svm, spectrum_kernel,linear_kernel, gaussian_kernel
+from svm import my_svm, spectrum_kernel, linear_kernel, gaussian_kernel
 import pandas as pd 
 from sklearn.metrics import accuracy_score
 import numpy as np
 
 
-print(accuracy_score([0,0],[1,1]))
+print(accuracy_score([0, 0], [1, 1]))
 
 data_train = pd.read_csv('data/Xtr0.csv', index_col=0)
 data_train2 = pd.read_csv('data/Xtr1.csv', index_col=0)
 data_train3 = pd.read_csv('data/Xtr2.csv', index_col=0)
-data_train = pd.concat([data_train,data_train2,data_train3])
+data_train = pd.concat([data_train, data_train2, data_train3])
 data_train = np.array([convert_data(x) for x in data_train['seq']])
 data_train = data_train[:-600]
 
