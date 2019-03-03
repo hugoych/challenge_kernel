@@ -3,13 +3,13 @@ import numpy as np
 
 def string_to_int(x):
     if x == 'A':
-        return 1
+        return 0
     elif x =='C':
-        return 2
+        return 1
     elif x == 'G':
-        return 3
+        return 2
     elif x == 'T':
-        return 4
+        return 3
     else:
         print('WARNING: Unknown char')
         return None

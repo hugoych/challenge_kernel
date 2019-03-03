@@ -10,3 +10,7 @@
 \.idea/workspace\.xml
 
 \.idea/vcs\.xml
+
+__pycache__/
+
+data/
