@@ -108,6 +108,7 @@ class SVM:
         mask = mask.reshape(-1)
         self.alpha = alpha[mask].reshape(-1, 1)
         self.X_sp = self.X[mask]
+        self.Y_sp = self.Y[mask]
         if self.kernel == 'spectrum':
             self.X_spectrum = self.X_spectrum[mask]
 

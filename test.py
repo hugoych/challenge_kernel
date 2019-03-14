@@ -2,14 +2,22 @@ import numpy as np
 import pandas as pd
 import utils
 import kernel_methods
+from time import time
+from sklearn.model_selection import train_test_split
 
-data, label = utils.load_training_data()
-# data = (data - data.mean(0))/data.std(0)
-training, validation = utils.split(data, label, 0.8, 0.2)
-data.mean()
-svm = kernel_methods.SVM('spectrum', C=3.0, kernel_param={'p': 5, 'var': 2.})
-svm.X, svm.Y = training
-svm.K = svm.build_K()
-svm.solve()
-print(svm.score(*training))
-print(svm.score(*validation))
+predictions = []
+
+for i in range(3):
+    data, label = utils.load_training_data(i)
+    data_train, data_val, y_train, y_val = train_test_split(data, label, train_size=0.8)
+    data_test = utils.load_test_data(i)
+    training = data_train, y_train
+    validation = data_val, y_val
+
+    svm = kernel_methods.SVM('spectrum', C=1.0, kernel_param={'p': 5, 'var': 2.})
+    svm.X, svm.Y = data, label
+    svm.K = svm.build_K()
+    svm.solve()
+    print(svm.score(*training))
+    predictions.append(svm.predict(data_test))
+
