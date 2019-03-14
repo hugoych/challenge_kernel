@@ -108,11 +108,16 @@ class SVM:
         alpha = np.array(solution['x'])
         mask = np.abs(alpha) > 1e-4
         mask = mask.reshape(-1)
+
         self.alpha = alpha[mask].reshape(-1, 1)
         self.X_sp = self.X[mask]
         self.Y_sp = self.Y[mask]
         if self.kernel == 'spectrum':
             self.X_spectrum = self.X_spectrum[mask]
+        if self.kernel == 'mismatch':
+            self.X_mismatch = self.X_mismatch[mask]
+
+
 
     def build_K(self, X=None):
         '''
@@ -212,22 +217,28 @@ class SVM:
             for j in range(X.shape[1] - self.k):
                 seq = list(X[i][j:j + self.k])
                 matchs = []
-                for i in range(len(seq)):
+                for l in range(len(seq)):
                     for k in range(4):
-                        matchs.append(tuple(seq[:i] + [k] +seq[i+1:]))
-                matchs = np.unique(matchs)
+                        matchs.append(tuple(seq[:l] + [k] +seq[l+1:]))
+
+                matchs = np.unique(matchs,axis=0)
                 for key in matchs:
-                    X_mismatch[i, self._spectrum_dict[key]] += 1
+                    X_mismatch[i, self._spectrum_dict[tuple(key)]] += 1
         return X_mismatch
     
     def _mismatch_kernel(self, X=None):
         if self.X_mismatch is None:
+            
             self.X_mismatch = self._to_mismatch(self.X)
+
         if X is None:
+            
             K = self.X_mismatch @ self.X_mismatch.T
+            
+
         else:
-            X_s = self._to_mismatch(X)
-            K = self.X_mismatch @ X_s.T
+            X_m = self._to_mismatch(X)
+            K = self.X_mismatch @ X_m.T
         return K
     
 
