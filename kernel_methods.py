@@ -59,6 +59,7 @@ class SVM:
         self.Y = None
         self.k = kernel_param.get('k', 3)
         self.X_spectrum = None
+        self.X_mismatch = None
         # spectrum_dict: only for spectrum kernel
         self._spectrum_dict = {e: i for i, e in enumerate(itertools.product(*[range(4)] * self.k))}
 
@@ -75,6 +76,7 @@ class SVM:
         self.Y = None
         self.k = kernel_param.get('k', 3)
         self.X_spectrum = None
+        self.X_mismatch = None
         self._spectrum_dict = {e: i for i, e in enumerate(itertools.combinations_with_replacement(range(4), self.k))}
 
     def set_kernel(self, kernel):
@@ -83,7 +85,7 @@ class SVM:
         Args:
             kernel (str or callable):  Either a string between 'gaussian', 'polynomial', 'spectrum' or a callable
         '''
-        assert (kernel in ['gaussian', 'polynomial', 'spectrum']) or callable(kernel)
+        assert (kernel in ['gaussian', 'polynomial', 'spectrum', 'mismatch']) or callable(kernel)
         self.kernel = kernel
 
     def solve(self):
@@ -127,6 +129,8 @@ class SVM:
                 return self._polynomial_kernel(X)
             elif self.kernel == 'spectrum':
                 return self._spectrum_kernel(X)
+            elif self.kernel == 'mismatch':
+                return self._mismatch_kernel(X)
         else:
             if X is None:
                 n, d = self.X.shape
@@ -186,7 +190,7 @@ class SVM:
         return K
 
     def _to_spectrum(self, X):
-        X_spectrum = np.zeros((X.shape[0], X.shape[1] - self.k))
+        X_spectrum = np.zeros((X.shape[0],len(self._spectrum_dict.keys())))
         for i in range(X.shape[0]):
             for j in range(X.shape[1] - self.k):
                 X_spectrum[i, self._spectrum_dict[tuple(X[i][j:j + self.k])]] += 1
@@ -201,6 +205,31 @@ class SVM:
             X_s = self._to_spectrum(X)
             K = self.X_spectrum @ X_s.T
         return K
+    
+    def _to_mismatch(self, X):
+        X_mismatch = np.zeros((X.shape[0],len(self._spectrum_dict.keys())))
+        for i in range(X.shape[0]):
+            for j in range(X.shape[1] - self.k):
+                seq = list(X[i][j:j + self.k])
+                matchs = []
+                for i in range(len(seq)):
+                    for k in range(4):
+                        matchs.append(tuple(seq[:i] + [k] +seq[i+1:]))
+                matchs = np.unique(matchs)
+                for key in matchs:
+                    X_mismatch[i, self._spectrum_dict[key]] += 1
+        return X_mismatch
+    
+    def _mismatch_kernel(self, X=None):
+        if self.X_mismatch is None:
+            self.X_mismatch = self._to_mismatch(self.X)
+        if X is None:
+            K = self.X_mismatch @ self.X_mismatch.T
+        else:
+            X_s = self._to_mismatch(X)
+            K = self.X_mismatch @ X_s.T
+        return K
+    
 
     def fit(self, X, Y):
         '''

@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from preprocessing import convert_data
+from sklearn.model_selection import train_test_split
 
 
 def load_training_data(i):
@@ -24,13 +25,7 @@ def load_mat_data():
     return data, label
 
 
-def split(data, label, training, validation):
-    assert training + validation == 1
-    n = len(data)
-    perm = np.random.permutation(n)
-    data = data[perm]
-    training_index = int(training * n)
-    training = (data[:training_index], label[:training_index])
-    validation = (data[training_index:], label[training_index:])
-    return training, validation
+def split(data, labels, validation_split=0.7):
+    
+    return train_test_split(data, labels, stratify=labels, test_size=validation_split)
 
