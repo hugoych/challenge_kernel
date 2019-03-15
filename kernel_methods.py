@@ -19,14 +19,19 @@ class Hyper:
             kernel_name = kernel[0] if not callable(kernel[0]) else kernel[0].__name__
             svm.X = X_train
             svm.Y = Y_train
+            print(svm.K)
             svm.build_K()
+            print(svm.K)
             for c in self.Cs:
                 svm.C = c
+                print('Training for this C= ',svm.C  )
+                svm.build_K()
+                print(svm.K)
                 svm.solve()
                 acc_train = svm.score(X_train, Y_train)
                 acc_test = svm.score(X_validation, Y_validation)
                 history.append({'kernel': kernel_name, 'C': c, 'acc_train': acc_train, 'acc_test': acc_test})
-                print(history[-1])
+                print(history)
         self.history = history
         return history
 
@@ -93,6 +98,7 @@ class SVM:
         Solve the Convex optimization problem
         '''
         n, d = self.X.shape
+        print(np.unique(self.K))
         P = cvxopt.matrix(self.K)
         y = self.Y.astype(np.float64)
         q = cvxopt.matrix(-y)
